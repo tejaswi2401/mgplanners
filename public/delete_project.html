@@ -96,7 +96,7 @@
 
             const projectName = document.getElementById('projectName').value;
 
-            fetch(`http://localhost:8032/projects/name/${projectName}`, {
+            fetch(`http://:8032/projects/name/${projectName}`, {
                 method: 'DELETE'
             })
             .then(response => response.json())
