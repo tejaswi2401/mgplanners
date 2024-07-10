@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Project</title>
+    <link rel="stylesheet" href="styles2.css">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Delete Project</title>
+        <link rel="stylesheet" href="styles2.css">
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                min-height: 100vh;
+                background-image: url('const.jpeg');
+                background-size: cover;
+                background-position: center;
+                margin: 0;
+                padding: 0;
+            }
+    
+            .container {
+                width: 90%;
+                max-width: 400px;
+                background-color: rgba(255, 255, 255, 0.9);
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                text-align: center;
+            }
+    
+            h1 {
+                margin-bottom: 20px;
+            }
+    
+            label {
+                display: block;
+                margin-bottom: 10px;
+                font-weight: bold;
+                text-align: left;
+            }
+    
+            input[type="text"] {
+                width: calc(100% - 20px);
+                padding: 10px;
+                margin-bottom: 20px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                font-size: 16px;
+                box-sizing: border-box;
+            }
+    
+            button {
+                width: 100%;
+                padding: 10px;
+                background-color: #d9534f;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                font-size: 16px;
+                cursor: pointer;
+                box-sizing: border-box;
+            }
+    
+            button:hover {
+                background-color: #c9302c;
+            }
+    
+            #message {
+                margin-top: 20px;
+                font-size: 16px;
+            }
+        </style>
+    </head>
+</head>
+<body>
+    <div class="container">
+        <h1>Delete Project</h1>
+        <form id="deleteProjectForm">
+            <label for="projectName">Project Name:</label>
+            <input type="text" id="projectName" name="projectName" required>
+            <button type="submit">Delete Project</button>
+        </form>
+        <p id="message"></p>
+    </div>
+
+    <script>
+        document.getElementById('deleteProjectForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const projectName = document.getElementById('projectName').value;
+
+            fetch(`http://localhost:8032/projects/name/${projectName}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                const messageElement = document.getElementById('message');
+                if (data.error) {
+                    messageElement.textContent = 'Error: ' + data.error;
+                    messageElement.style.color = 'red';
+                } else {
+                    messageElement.textContent = data.message;
+                    messageElement.style.color = 'green';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>

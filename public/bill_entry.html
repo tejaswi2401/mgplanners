@@ -1,0 +1,566 @@
+    <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Bill Entry</title>
+            <link rel="stylesheet" href="styles2.css">
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: flex-start;
+                    min-height: 100vh;
+                    background-color: #f0f0f0;
+                }
+        
+                .navbar {
+                    width: 100%;
+                    background-color: #007bff;
+                    color: white;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 10px 20px;
+                    box-sizing: border-box;
+                }
+        
+                .navbar .logo img {
+                    max-height: 50px;
+                }
+        
+                .container {
+                    width: 80%;
+                    max-width: 800px;
+                    margin-top: 100px;
+                    background-color: #fff;
+                    padding: 20px;
+                    border-radius: 5px;
+                    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+                }
+        
+                .form-group {
+                    margin-bottom: 15px;
+                }
+        
+                .form-group label {
+                    font-weight: bold;
+                    display: block;
+                    margin-bottom: 5px;
+                }
+        
+                .form-group input, .form-group select, .form-group textarea {
+                    padding: 8px;
+                    font-size: 16px;
+                    width: calc(100% - 16px);
+                    border: 1px solid #ccc;
+                    border-radius: 5px;
+                    outline: none;
+                }
+        
+                .form-group input[type="date"] {
+                    width: 100%;
+                }
+        
+                .form-group button {
+                    padding: 10px 20px;
+                    font-size: 16px;
+                    cursor: pointer;
+                    background-color: #007bff;
+                    color: #fff;
+                    border: none;
+                    border-radius: 5px;
+                    outline: none;
+                    width: 100%; /* Ensure buttons take full width on mobile */
+                    margin-top: 10px; /* Add spacing between buttons on mobile */
+                }
+        
+                .form-group button:hover {
+                    background-color: #0056b3;
+                }
+        
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-top: 20px;
+                }
+        
+                table th, table td {
+                    border: 1px solid #ddd;
+                    padding: 8px;
+                    text-align: left;
+                }
+        
+                table th {
+                    background-color: #f2f2f2;
+                }
+        
+                .edit-delete-buttons button {
+                    padding: 5px 10px;
+                    font-size: 14px;
+                    cursor: pointer;
+                    background-color: #007bff;
+                    color: #fff;
+                    border: none;
+                    border-radius: 5px;
+                    outline: none;
+                }
+        
+                .edit-delete-buttons button:hover {
+                    background-color: #0056b3;
+                }
+        
+                .action-buttons {
+                    margin-top: 20px;
+                    display: flex;
+                    justify-content: space-between; /* Ensure buttons are evenly spaced */
+                    flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+                }
+        
+                .action-buttons button {
+                    padding: 10px 20px;
+                    font-size: 16px;
+                    cursor: pointer;
+                    background-color: #007bff;
+                    color: #fff;
+                    border: none;
+                    border-radius: 5px;
+                    outline: none;
+                    margin-bottom: 10px; /* Add spacing between buttons */
+                }
+        
+                .action-buttons button:hover {
+                    background-color: #0056b3;
+                }
+        
+                .message {
+                    margin-top: 10px;
+                    padding: 10px;
+                    background-color: #d4edda;
+                    color: #155724;
+                    border: 1px solid #c3e6cb;
+                    border-radius: 5px;
+                    text-align: center;
+                    display: none;
+                }
+        
+                .search-container {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 20px;
+                }
+        
+                .search-container .form-group {
+                    width: 45%;
+                }
+            </style>
+        </head>
+        <div class="navbar">
+            <div class="logo">
+                <img src="logo.png" alt="Company Logo">
+            </div>
+            <div class="logout">
+                <a href="#" onclick="logout()">Logout</a>
+            </div>
+        </div>
+
+        <div class="container">
+            <h2>Bill Entry</h2>
+            <div class="form-group">
+                <label for="projectSelect">Select Project:</label>
+                <select id="projectSelect" onchange="loadProjectDetails()">
+                    <!-- Projects will be populated dynamically -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="billDate">Date:</label>
+                <input type="date" id="billDate">
+            </div>
+            <div class="form-group">
+                <label for="materialSelect">Select Material:</label>
+                <select id="materialSelect">
+                    <!-- Materials will be populated dynamically -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <textarea id="description" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="billAmount">Bill Amount:</label>
+                <input type="number" id="billAmount" step="0.01">
+            </div>
+            <div class="form-group">
+                <label for="paymentTo">Payment To:</label>
+                <input type="text" id="paymentTo">
+            </div>
+            <div class="form-group">
+                <label for="paymentBy">Payment By:</label>
+                <input type="text" id="paymentBy">
+            </div>
+            <div class="form-group">
+                <label for="paymentMethod">Payment Method:</label>
+                <input type="text" id="paymentMethod">
+            </div>
+
+            <div class="search-container">
+                <div class="form-group">
+                    <label for="searchMaterial">Search by Material:</label>
+                    <select id="searchMaterial" onchange="filterBillEntries()">
+                        <!-- Materials will be populated dynamically -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="searchDate">Search by Date:</label>
+                    <input type="date" id="searchDate" onchange="filterBillEntries()">
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table id="billTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Material</th>
+                            <th>Description</th>
+                            <th>Bill Amount</th>
+                            <th>Payment To</th>
+                            <th>Payment By</th>
+                            <th>Payment Method</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="billTableBody">
+                        <!-- Bill entries will be added dynamically -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="action-buttons">
+                <button class="back-button" onclick="goToHomepage()">Back</button>
+                <button class="save-button" onclick="saveBillEntry()">Save</button>
+                <button class="update-button" onclick="updateBillEntry()">Update</button>
+                <button class="delete-button" onclick="deleteBillEntry()">Delete</button>
+                <button class="show-deleted-button" onclick="showDeletedEntries()">Show Deleted Entries</button>
+            </div>
+    
+            <div id="warningMessage" class="message" style="display: none;">
+                <p>Warning: Bill amount exceeds estimated budget for selected project!</p>
+            </div>
+    
+            <div class="form-group">
+                <label for="remainingBudget">Remaining Budget:</label>
+                <span id="remainingBudget"></span>
+            </div>
+            
+            <div id="deletedEntriesSection" style="display: none;">
+                <h3>Deleted Entries</h3>
+                <table id="deletedEntriesTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Material</th>
+                            <th>Description</th>
+                            <th>Bill Amount</th>
+                            <th>Payment To</th>
+                            <th>Payment By</th>
+                            <th>Payment Method</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="deletedEntriesTableBody">
+                        <!-- Deleted entries will be added dynamically -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="total-amount-container">
+                <div class="form-group">
+                    <label for="totalAmount">Total Amount:</label>
+                    <span id="totalAmount"></span>
+                </div>
+            </div>
+        </div>
+    
+        <script>
+            // Function to fetch data from the server
+            function fetchFromServer(endpoint) {
+                return fetch(endpoint)
+                    .then(response => response.json())
+                    .catch(error => console.error('Error:', error));
+            }
+    
+            // Function to send data to the server
+            function sendToServer(endpoint, data, method = 'POST') {
+                return fetch(endpoint, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                })
+                    .then(response => response.json())
+                    .catch(error => console.error('Error:', error));
+            }
+    
+            // Function to populate project select options
+            function populateProjects() {
+                fetchFromServer('http://localhost:8032/projects').then(projects => {
+                    var projectSelect = document.getElementById('projectSelect');
+                    projectSelect.innerHTML = '';
+                    projects.forEach(project => {
+                        var option = document.createElement('option');
+                        option.textContent = project.name;
+                        projectSelect.appendChild(option);
+                    });
+                });
+            }
+    
+            // Function to populate material select options
+            function populateMaterials() {
+    fetchFromServer('http://localhost:8032/materials').then(materials => {
+        var materialSelect = document.getElementById('materialSelect');
+        var searchMaterialSelect = document.getElementById('searchMaterial');
+        materialSelect.innerHTML = '';
+        searchMaterialSelect.innerHTML = '<option value="">All Materials</option>'; // Default option for search filter
+        materials.forEach(material => {
+            var option = document.createElement('option');
+            option.textContent = material.name; // Assuming material object has a 'name' property
+            materialSelect.appendChild(option);
+            
+            var searchOption = document.createElement('option');
+            searchOption.textContent = material.name;
+            searchMaterialSelect.appendChild(searchOption);
+        });
+    });
+}
+    
+            // Function to load project details on project selection change
+            function loadProjectDetails() {
+                var projectName = document.getElementById('projectSelect').value;
+                displayBillEntries(projectName);
+                var encodedProjectName = encodeURIComponent(projectName);
+    var url = `http://localhost:8032/projects/${encodedProjectName}/expected_budget`;
+
+    // Fetch expected budget based on project name
+    fetchFromServer(url)
+        .then(data => {
+            const expectedBudget = data.expected_budget;
+            document.getElementById('remainingBudget').textContent = expectedBudget.toFixed(2);
+        })
+        .catch(error => {
+            console.error('Error fetching expected budget:', error);
+            // Handle error as needed, e.g., display an error message
+        });
+}
+    
+            // Function to display bill entries in the table for a specific project
+            function displayBillEntries(projectName) {
+    var searchMaterial = document.getElementById('searchMaterial').value;
+    var searchDate = document.getElementById('searchDate').value;
+
+    console.log('Fetching bill entries for project:', projectName); // Log project name
+
+    fetchFromServer(`http://localhost:8032/bill_entries/projectName?projectName=${projectName}&material=${searchMaterial}&date=${searchDate}`)
+        .then(billEntries => {
+            console.log('Fetched bill entries:', billEntries); // Log fetched bill entries
+
+            var billTableBody = document.getElementById('billTableBody');
+            billTableBody.innerHTML = '';
+
+            if (!billEntries || billEntries.length === 0) {
+                console.log('No bill entries found.');
+                return;
+            }
+
+            billEntries.forEach(entry => {
+                var row = billTableBody.insertRow();
+                row.insertCell(0).textContent = entry.date;
+                row.insertCell(1).textContent = entry.material;
+                row.insertCell(2).textContent = entry.description;
+                row.insertCell(3).textContent = entry.bill_amount;
+                row.insertCell(4).textContent = entry.payment_to;
+                row.insertCell(5).textContent = entry.payment_by;
+                row.insertCell(6).textContent = entry.payment_method;
+
+                var actionCell = row.insertCell(7);
+                var editButton = document.createElement('button');
+                editButton.textContent = 'Edit';
+                editButton.onclick = () => editBillEntry(entry.id);
+                actionCell.appendChild(editButton);
+
+                var deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.onclick = () => deleteBillEntry(entry.id);
+                actionCell.appendChild(deleteButton);
+            });
+
+            var totalAmount = billEntries.reduce((acc, entry) => acc + parseFloat(entry.bill_amount), 0);
+            document.getElementById('totalAmount').textContent = totalAmount.toFixed(2);
+
+            var encodedProjectName = encodeURIComponent(projectName);
+            console.log('Fetching budget for project:', projectName); // Log budget fetch
+
+            fetch(`http://localhost:8032/projects/${encodedProjectName}/expected_budget`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const remainingBudget = data.expected_budget - totalAmount;
+                    document.getElementById('remainingBudget').textContent = remainingBudget.toFixed(2);
+                    document.getElementById('warningMessage').style.display = remainingBudget < 0 ? 'block' : 'none';
+                })
+                .catch(error => {
+                    console.error('Error fetching budget:', error);
+                    // Handle error as needed, e.g., display an error message
+                });
+        })
+        .catch(error => console.error('Error fetching bill entries:', error));
+}
+
+// Filter bill entries based on material and date
+
+
+            // Function to save bill entry to the server
+            function saveBillEntry() {
+    const data = {
+        projectName: projectSelect.value,
+        date: billDate.value,
+        material: materialSelect.value,
+        description: description.value,
+        billAmount: parseFloat(billAmount.value),
+        paymentTo: paymentTo.value,
+        paymentBy: paymentBy.value,
+        paymentMethod: paymentMethod.value
+    };
+
+    fetch('http://localhost:8032/save-entry', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Success:', data);
+         // Clear the form fields after successful save
+        displayBillEntries(projectSelect.value); // Refresh bill entries for the selected project
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
+    
+            // Function to delete bill entry from the server
+           
+
+    
+            // Function to edit bill entry
+            function editBillEntry(entryId) {
+    fetchFromServer(`http://localhost:8032/bill_entries/${entryId}`).then(entry => {
+        document.getElementById('billDate').value = entry.date;
+        document.getElementById('materialSelect').value = entry.material;
+        document.getElementById('description').value = entry.description;
+        document.getElementById('billAmount').value = entry.billAmount;
+        document.getElementById('paymentTo').value = entry.paymentTo;
+        document.getElementById('paymentBy').value = entry.paymentBy;
+        document.getElementById('paymentMethod').value = entry.paymentMethod;
+
+        document.querySelector('.update-button').onclick = function() {
+            updateBillEntry(entryId);
+        };
+    });
+}
+
+            // Function to update bill entry on the server
+            function updateBillEntry(entryId) {
+                var updatedEntry = {
+                    date: document.getElementById('billDate').value,
+                    material: document.getElementById('materialSelect').value,
+                    description: document.getElementById('description').value,
+                    billAmount: document.getElementById('billAmount').value,
+                    paymentTo: document.getElementById('paymentTo').value,
+                    paymentBy: document.getElementById('paymentBy').value,
+                    paymentMethod: document.getElementById('paymentMethod').value
+                };
+    
+                sendToServer(`http://localhost:8032/bill_entries/${entryId}`, updatedEntry, 'PUT').then(response => {
+                    loadProjectDetails();
+                });
+            }
+    
+            // Function to filter bill entries
+            function filterBillEntries() {
+                var projectName = document.getElementById('projectSelect').value;
+                displayBillEntries(projectName);
+            }
+            function deleteBillEntry(entryId) {
+    sendToServer(`http://localhost:8032/delete_bill_entries/${entryId}`, {}, 'DELETE')
+        .then(response => {
+            loadProjectDetails(); // Example function to reload data after deletion
+        })
+        .catch(error => {
+            console.error('Failed to delete bill entry:', error);
+        });
+}
+    
+            // Function to show deleted entries
+            function showDeletedEntries() {
+    fetchFromServer('http://localhost:8032/delete_bill_entries')
+        .then(deletedEntries => {
+            var deletedEntriesTableBody = document.getElementById('deletedEntriesTableBody');
+            deletedEntriesTableBody.innerHTML = '';
+
+            deletedEntries.forEach(entry => {
+                var row = deletedEntriesTableBody.insertRow();
+                row.insertCell(0).textContent = entry.date;
+                row.insertCell(1).textContent = entry.material;
+                row.insertCell(2).textContent = entry.description;
+                row.insertCell(3).textContent = entry.bill_amount;
+                row.insertCell(4).textContent = entry.payment_to;
+                row.insertCell(5).textContent = entry.payment_by;
+                row.insertCell(6).textContent = entry.payment_method;
+
+                var actionCell = row.insertCell(7);
+                var restoreButton = document.createElement('button');
+                restoreButton.textContent = 'Restore';
+                restoreButton.onclick = () => restoreBillEntry(entry.id);
+                actionCell.appendChild(restoreButton);
+            });
+
+            // Display the section after loading entries
+            document.getElementById('deletedEntriesSection').style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Failed to fetch deleted entries:', error);
+            // Handle errors, such as displaying an error message
+        });
+}
+
+
+            // Function to restore deleted entry
+            function restoreBillEntry(entryId) {
+    sendToServer(`http://localhost:8032/restore_entry`, { id: entryId }, 'POST')
+        .then(response => {
+            showDeletedEntries();
+            loadProjectDetails();
+        })
+        .catch(error => {
+            console.error('Failed to restore bill entry:', error);
+        });
+}
+
+    
+            // Initialize the page by populating projects and materials
+            document.addEventListener('DOMContentLoaded', function() {
+                populateProjects();
+                populateMaterials();
+            });
+        </script>
+    </body>
+    </html>
