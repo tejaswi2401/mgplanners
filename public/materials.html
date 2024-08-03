@@ -1,5 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Materials Management</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -41,29 +45,6 @@
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
         }
 
-        .material-list {
-            list-style-type: none;
-            padding: 0;
-            margin-top: 10px;
-            margin-bottom: 20px;
-        }
-
-        .material-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #ddd;
-            padding: 10px 0;
-            font-size: 16px;
-        }
-
-        .material-item span {
-            flex: 1;
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-        }
-
         .actions {
             margin-top: 20px;
             display: flex;
@@ -88,7 +69,7 @@
             color: #fff;
         }
 
-        .update-button {
+        .edit-button {
             background-color: #007bff;
             color: #fff;
         }
@@ -103,10 +84,71 @@
             color: #212529;
         }
 
-        .button:hover {
+        .action-button:hover {
             filter: brightness(85%);
         }
+
+        .material-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .material-item {
+            flex: 0 0 48%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .material-item span {
+            flex: 1;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .form-container {
+            margin-top: 20px;
+        }
+
+        .form-container select, .form-container input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        .back-button {
+            display: block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .back-button:hover {
+            filter: brightness(85%);
+        }
+
+        #message {
+            margin-top: 20px;
+            font-size: 16px;
+        }
     </style>
+</head>
 <body>
     <div class="navbar">
         <div class="logo">
@@ -118,21 +160,38 @@
     </div>
 
     <div class="container">
-        <h2>Materials List</h2>
+        <h2>Materials Management</h2>
+        <div class="actions">
+            <button class="action-button add-button" onclick="addMaterial()">Add Material</button>
+            <button class="action-button edit-button" onclick="showEditMaterialForm()">Edit Materials</button>
+            <button class="action-button delete-button" onclick="showDeleteMaterialForm()">Delete Material</button>
+            <button class="action-button save-button" onclick="saveMaterials()">Save</button>
+        </div>
+
+        <div id="editMaterialForm" class="form-container" style="display: none;">
+            <label for="editMaterialSelect">Select Material to Edit:</label>
+            <select id="editMaterialSelect"></select>
+            <label for="newMaterialName">New Material Name:</label>
+            <input type="text" id="newMaterialName">
+            <button class="action-button edit-button" onclick="editMaterial()">Submit</button>
+        </div>
+
+        <div id="deleteMaterialForm" class="form-container" style="display: none;">
+            <label for="deleteMaterialSelect">Select Material to Delete:</label>
+            <select id="deleteMaterialSelect"></select>
+            <button class="action-button delete-button" onclick="deleteMaterial()">Submit</button>
+        </div>
+
         <ul class="material-list" id="materialList">
             <!-- Material items will be added dynamically here -->
         </ul>
+        <button class="back-button" onclick="goBack()">Back</button>
 
-        <div class="actions">
-            <button class="action-button add-button" onclick="addMaterial()">Add Material</button>
-            <button class="action-button update-button" onclick="updateMaterials()">Update Materials</button>
-            <button class="action-button delete-button" onclick="deleteMaterial()">Delete Material</button>
-            <button class="action-button save-button" onclick="saveMaterials()">Save</button>
-        </div>
+        <p id="message"></p>
     </div>
 
     <script>
-        const apiUrl = 'https://mgplanners.onrender.com:8032/materials';
+        const apiUrl = '/materials';
 
         function fetchMaterials() {
             fetch(apiUrl)
@@ -145,7 +204,12 @@
 
         function displayMaterials(materials) {
             const materialList = document.getElementById('materialList');
+            const editMaterialSelect = document.getElementById('editMaterialSelect');
+            const deleteMaterialSelect = document.getElementById('deleteMaterialSelect');
+            
             materialList.innerHTML = '';
+            editMaterialSelect.innerHTML = '';
+            deleteMaterialSelect.innerHTML = '';
 
             materials.forEach(material => {
                 const listItem = document.createElement('li');
@@ -154,6 +218,13 @@
                 listItem.setAttribute('data-id', material.id);
                 listItem.setAttribute('data-name', material.name);
                 materialList.appendChild(listItem);
+
+                const option = document.createElement('option');
+                option.value = material.id;
+                option.textContent = material.name;
+                editMaterialSelect.appendChild(option);
+                const deleteOption = option.cloneNode(true);
+                deleteMaterialSelect.appendChild(deleteOption);
             });
         }
 
@@ -176,22 +247,21 @@
             }
         }
 
-        function updateMaterials() {
-            const materialNameToUpdate = prompt('Enter the current material name to update:');
-            const newMaterialName = prompt('Enter the new material name:');
+        function showEditMaterialForm() {
+            document.getElementById('editMaterialForm').style.display = 'block';
+            document.getElementById('deleteMaterialForm').style.display = 'none';
+        }
 
-            const materialToUpdate = Array.from(document.querySelectorAll('.material-item')).find(
-                item => item.getAttribute('data-name') === materialNameToUpdate.trim()
-            );
-
-            if (materialToUpdate && newMaterialName && newMaterialName.trim() !== '') {
-                const materialId = materialToUpdate.getAttribute('data-id');
+        function editMaterial() {
+            const materialId = document.getElementById('editMaterialSelect').value;
+            const newMaterialName = document.getElementById('newMaterialName').value.trim();
+            if (materialId && newMaterialName) {
                 fetch(`${apiUrl}/${materialId}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ name: newMaterialName.trim() })
+                    body: JSON.stringify({ name: newMaterialName })
                 })
                 .then(response => response.json())
                 .then(data => {
@@ -199,15 +269,18 @@
                     fetchMaterials();
                 })
                 .catch(error => console.error('Error updating material:', error));
-            } else {
-                alert('Material not found or invalid new name.');
             }
         }
 
+        function showDeleteMaterialForm() {
+            document.getElementById('editMaterialForm').style.display = 'none';
+            document.getElementById('deleteMaterialForm').style.display = 'block';
+        }
+
         function deleteMaterial() {
-            const materialToDelete = prompt('Enter the material name to delete:');
-            if (materialToDelete && materialToDelete.trim() !== '') {
-                fetch(`${apiUrl}/${encodeURIComponent(materialToDelete.trim())}`, {
+            const materialId = document.getElementById('deleteMaterialSelect').value;
+            if (materialId) {
+                fetch(`${apiUrl}/${materialId}`, {
                     method: 'DELETE'
                 })
                 .then(response => response.json())
@@ -226,13 +299,16 @@
         function logout() {
             var confirmation = confirm('Are you sure you want to logout?');
             if (confirmation) {
-                window.location.href = 'index.html'; // Redirect to index.html
+                window.location.href = 'index.html';
             }
         }
+        function goBack() {
+            window.history.back();
+        }
 
-        window.onload = function() {
-            fetchMaterials();
-        };
+
+        // Fetch and display materials on page load
+        window.onload = fetchMaterials;
     </script>
 </body>
 </html>

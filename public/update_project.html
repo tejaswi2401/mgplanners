@@ -1,91 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Update Project</title>
-        <link rel="stylesheet" href="styles2.css">
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                margin: 0;
-                padding: 0;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                min-height: 100vh;
-                background-image: url('const.jpeg');
-                background-size: cover;
-                background-position: center;
-            }
-    
-            .navbar {
-                width: 100%;
-                background-color: #0047AB;
-                color: white;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 10px 20px;
-                box-sizing: border-box;
-            }
-    
-            .navbar .logo img {
-                max-height: 40px;
-            }
-    
-            .navbar .logout a {
-                color: white;
-                text-decoration: none;
-                font-weight: bold;
-                font-size: 16px;
-            }
-    
-            .form-container {
-                margin-top: 20px;
-                width: 90%;
-                max-width: 600px;
-                background-color: #fff;
-                padding: 20px;
-                border-radius: 5px;
-                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            }
-    
-            .form-group {
-                margin-bottom: 20px;
-            }
-    
-            .form-group label {
-                display: block;
-                margin-bottom: 5px;
-                font-weight: bold;
-            }
-    
-            .form-group input {
-                width: calc(100% - 12px);
-                padding: 8px;
-                font-size: 16px;
-                border: 1px solid #ccc;
-                border-radius: 3px;
-            }
-    
-            .form-group input[type="submit"] {
-                background-color: #007bff;
-                color: #fff;
-                border: none;
-                cursor: pointer;
-                padding: 10px 20px;
-                font-size: 16px;
-                border-radius: 5px;
-                outline: none;
-            }
-    
-            .form-group input[type="submit"]:hover {
-                background-color: #0056b3;
-            }
-        </style>
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Project</title>
+    <link rel="stylesheet" href="styles2.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-image: url('const.jpeg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .navbar {
+            width: 100%;
+            background-color: #0047AB;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            box-sizing: border-box;
+        }
+
+        .navbar .logo img {
+            max-height: 40px;
+        }
+
+        .navbar .logout a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .form-container {
+            margin-top: 20px;
+            width: 90%;
+            max-width: 600px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: calc(100% - 12px);
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            box-sizing: border-box;
+        }
+
+        .form-buttons {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .form-buttons input {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            outline: none;
+            margin-left: 10px; /* Add spacing between buttons */
+        }
+
+        .form-buttons input:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
 <body>
     <div class="navbar">
         <div class="logo">
@@ -101,9 +109,11 @@
         <form id="getProjectForm" onsubmit="getProjectDetails(event)">
             <div class="form-group">
                 <label for="searchProjectName">Project Name:</label>
-                <input type="text" id="searchProjectName" name="searchProjectName" required>
+                <select id="searchProjectName" name="searchProjectName" required>
+                    <option value="" disabled selected>Select a project</option>
+                </select>
             </div>
-            <div class="form-group">
+            <div class="form-buttons">
                 <input type="submit" value="Search">
             </div>
         </form>
@@ -116,8 +126,9 @@
                 <label for="expectedBudget">Expected Budget:</label>
                 <input type="number" id="expectedBudget" name="expectedBudget" required>
             </div>
-            <div class="form-group">
+            <div class="form-buttons">
                 <input type="submit" value="Submit">
+                <input type="button" value="Back" onclick="history.back()">
             </div>
         </form>
     </div>
@@ -130,15 +141,47 @@
             }
         }
 
-        // Function to retrieve project details and populate form
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fetch project names and populate the dropdown
+            fetchProjectNames();
+        });
+
+        function fetchProjectNames() {
+            fetch('/projects')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch project names');
+                    }
+                    return response.json();
+                })
+                .then(projects => {
+                    const selectProject = document.getElementById('searchProjectName');
+                    projects.forEach(project => {
+                        const option = document.createElement('option');
+                        option.value = project.name;
+                        option.textContent = project.name;
+                        selectProject.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to fetch project names. Please try again.');
+                });
+        }
+
         function getProjectDetails(event) {
             event.preventDefault();
 
             var projectName = document.getElementById('searchProjectName').value;
 
             // Fetch project details from server based on projectName
-            fetch(`https://mgplanners.onrender.com:8032/projects/name/${projectName}`)
-                .then(response => response.json())
+            fetch(`/projects/${encodeURIComponent(projectName)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Project not found');
+                    }
+                    return response.json();
+                })
                 .then(project => {
                     if (project) {
                         // Populate form fields with existing project data
@@ -147,8 +190,6 @@
 
                         // Show the update form
                         document.getElementById('updateProjectForm').style.display = 'block';
-                    } else {
-                        alert('Project not found. Please enter a valid project name.');
                     }
                 })
                 .catch(error => {
@@ -157,38 +198,35 @@
                 });
         }
 
-        // Function to update project details
         function updateProject(event) {
             event.preventDefault();
 
-            // Retrieve updated values from form
             var updatedProjectName = document.getElementById('projectName').value;
             var updatedExpectedBudget = document.getElementById('expectedBudget').value;
 
-            // Prepare data to send to server
             var formData = {
                 name: updatedProjectName,
                 expected_budget: updatedExpectedBudget
             };
 
-            // Send update request to server
-            fetch('https://mgplanners.onrender.com:8032/projects/name/' + updatedProjectName, {
+            fetch(`/projects/${encodeURIComponent(updatedProjectName)}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(formData)
             })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message); // Show success message from server
-                window.location.href = 'homepage.html'; // Redirect to homepage after update
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Failed to update project. Please try again.');
-            });
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message); // Show success message from server
+                    window.location.href = 'homepage.html'; // Redirect to homepage after update
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to update project. Please try again.');
+                });
         }
+        
     </script>
 </body>
 </html>

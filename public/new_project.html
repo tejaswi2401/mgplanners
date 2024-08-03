@@ -1,133 +1,167 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>New Project</title>
-        <link rel="stylesheet" href="styles2.css">
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                margin: 0;
-                padding: 0;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                min-height: 100vh;
-                background-image: url('const.jpeg');
-                background-size: cover;
-                background-position: center;
-            }
-    
-            .navbar {
-                width: 100%;
-                background-color: #0047AB;
-                color: white;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 10px 20px;
-                box-sizing: border-box;
-            }
-    
-            .navbar .logo img {
-                max-height: 40px;
-            }
-    
-            .navbar .logout a {
-                color: white;
-                text-decoration: none;
-                font-weight: bold;
-                font-size: 16px;
-            }
-    
-            .form-container {
-                margin-top: 20px;
-                width: 90%;
-                max-width: 600px;
-                background-color: #fff;
-                padding: 20px;
-                border-radius: 5px;
-                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            }
-    
-            .form-group {
-                margin-bottom: 20px;
-            }
-    
-            .form-group label {
-                display: block;
-                margin-bottom: 5px;
-                font-weight: bold;
-            }
-    
-            .form-group input {
-                width: calc(100% - 12px);
-                padding: 8px;
-                font-size: 16px;
-                border: 1px solid #ccc;
-                border-radius: 3px;
-            }
-    
-            .form-group input[type="submit"] {
-                background-color: #007bff;
-                color: #fff;
-                border: none;
-                cursor: pointer;
-                padding: 10px 20px;
-                font-size: 16px;
-                border-radius: 5px;
-                outline: none;
-            }
-    
-            .form-group input[type="submit"]:hover {
-                background-color: #0056b3;
-            }
-    
-            .message {
-                margin-top: 20px;
-                font-size: 16px;
-                color: green;
-                text-align: center;
-                display: none;
-            }
-    
-            .error {
-                margin-top: 20px;
-                font-size: 16px;
-                color: red;
-                text-align: center;
-                display: none;
-            }
-        </style>
-    </head>
-<body>
-    <div class="navbar">
-        <div class="logo">
-            <img src="logo.png" alt="Company Logo">
-        </div>
-        <div class="logout">
-            <a href="#" onclick="logout()">Logout</a>
-        </div>
-    </div>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Project</title>
+  <link rel="stylesheet" href="styles2.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background-image: url('const.jpeg');
+      background-size: cover;
+      background-position: center;
+    }
+    .navbar {
+      width: 100%;
+      background-color: #0047AB;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      box-sizing: border-box;
+    }
+    .navbar .logo img {
+      max-height: 40px;
+    }
+    .navbar .logout a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    .form-container {
+      margin-top: 20px;
+      width: 90%;
+      max-width: 600px;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    .form-group input {
+      width: calc(100% - 12px);
+      padding: 8px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+    .form-group .buttons {
+      display: flex;
+      justify-content: flex-start;
+      gap: 10px;
+    }
+    .form-group .buttons input[type="submit"], .form-group .buttons button {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      padding: 10px 20px;
+      font-size: 14px;
+      border-radius: 5px;
+      outline: none;
+    }
+    .form-group .buttons input[type="submit"]:hover, .form-group .buttons button:hover {
+      background-color: #0056b3;
+    }
+    .save-btn {
+  font-size: 12px;
+  padding: 3px 6px;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  width: auto;
+}
 
-    <div class="form-container">
-        <h2>New Project</h2>
-        <form id="newProjectForm" onsubmit="saveProject(event)">
-            <div class="form-group">
-                <label for="projectName">Project Name:</label>
-                <input type="text" id="projectName" name="projectName" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="expectedBudget">Expected Budget:</label>
-                <input type="number" id="expectedBudget" name="expectedBudget" required>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save">
-            </div>
-        </form>
+.save-btn:hover {
+  background-color: #0056b3;
+}
+
+.smaller-btn {
+  font-size: 12px;
+  padding: 3px 6px;
+}
+
+.form-group.buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.form-group.buttons button, .form-group.buttons input[type="submit"] {
+  width: 60px; /* set the width to a fixed value */
+}
+
+
+
+
+
+    .message {
+      margin-top: 20px;
+      font-size: 16px;
+      color: green;
+      text-align: center;
+      display: none;
+    }
+    .error {
+      margin-top: 20px;
+      font-size: 16px;
+      color: red;
+      text-align: center;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <div class="logo">
+      <img src="logo.png" alt="Company Logo">
+    </div>
+    <div class="logout">
+      <a href="#" onclick="logout()">Logout</a>
+    </div>
+  </div>
+  <div class="form-container">
+    <h2>New Project</h2>
+    <form id="newProjectForm" onsubmit="saveProject(event)">
+      <div class="form-group">
+        <label for="projectName">Project Name:</label>
+        <input type="text" id="projectName" name="projectName" required>
+      </div>
+      <div class="form-group">
+        <label for="expectedBudget">Expected Budget:</label>
+        <input type="number" id="expectedBudget" name="expectedBudget" required>
+      </div>
+      <div class="form-group buttons">
+        <input type="submit" value="Save" class="save-btn smaller-btn">
+        <button type="button" onclick="goBack()" class="save-btn smaller-btn">Back</button>
+      </div>
+      
+      
+    </form>
+   
+
         <div id="message" class="message" style="display: none;"></div>
         <div id="error" class="error" style="display: none;"></div>
     </div>
@@ -146,7 +180,7 @@
                 expected_budget: parseFloat(expectedBudget)  // Ensure expectedBudget is parsed as a float
             };
 
-            fetch('https://mgplanners.onrender.com:8032/projects', {
+            fetch('/projects', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -173,6 +207,10 @@
                 document.getElementById('error').innerText = 'Failed to save project. Please try again.';
                 document.getElementById('message').style.display = 'none';
             });
+        }
+
+        function goBack() {
+            window.location.href = 'homepage.html';
         }
     </script>
 </body>

@@ -1,3 +1,4 @@
+
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const bodyParser = require('body-parser');
@@ -44,37 +45,8 @@ db.serialize(() => {
         }
     });
 
-    db.run(`
-        CREATE TABLE IF NOT EXISTS categories (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL UNIQUE
-        )
-    `, (err) => {
-        if (err) {
-            console.error('Error creating categories table:', err.message);
-        } else {
-            // Insert default categories if table is newly created
-            db.run(`INSERT OR IGNORE INTO categories (name) VALUES ('Steel')`);
-            db.run(`INSERT OR IGNORE INTO categories (name) VALUES ('Sand')`);
-            db.run(`INSERT OR IGNORE INTO categories (name) VALUES ('Tapi')`);
-            db.run(`INSERT OR IGNORE INTO categories (name) VALUES ('Cement')`);
-        }
-    });
-
-    db.run(`
-        CREATE TABLE IF NOT EXISTS items (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            category_id INTEGER,
-            description TEXT,
-            price REAL,
-            FOREIGN KEY(category_id) REFERENCES categories(id)
-        )
-    `, (err) => {
-        if (err) {
-            console.error('Error creating items table:', err.message);
-        }
-    });
-
+   
+    
     db.run(`
         CREATE TABLE IF NOT EXISTS projects (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -137,84 +109,6 @@ db.serialize(() => {
     });
 });
 
-// Endpoint to get all categories
-app.get('/categories', (req, res) => {
-    db.all('SELECT * FROM categories', (err, rows) => {
-        if (err) {
-            console.error('SQLite query error:', err.message);
-            return res.status(500).json({ error: 'Internal Server Error' });
-        }
-        res.json(rows);
-    });
-});
-
-// Endpoint to get items by category
-app.get('/items/:category', (req, res) => {
-    const { category } = req.params;
-    db.all('SELECT * FROM items WHERE category_id = (SELECT id FROM categories WHERE name = ?)', [category], (err, rows) => {
-        if (err) {
-            console.error('SQLite query error:', err.message);
-            return res.status(500).json({ error: 'Internal Server Error' });
-        }
-        res.json(rows);
-    });
-});
-
-// Endpoint to add an item
-app.post('/items', (req, res) => {
-    const { category, description, price } = req.body;
-
-    db.get('SELECT id FROM categories WHERE name = ?', [category], (err, row) => {
-        if (err) {
-            console.error('SQLite query error:', err.message);
-            return res.status(500).json({ error: 'Internal Server Error' });
-        }
-        
-        if (!row) {
-            return res.status(404).json({ error: 'Category not found' });
-        }
-
-        const categoryId = row.id;
-
-        db.run('INSERT INTO items (category_id, description, price) VALUES (?, ?, ?)', [categoryId, description, price], function(err) {
-            if (err) {
-                console.error('SQLite insert error:', err.message);
-                return res.status(500).json({ error: 'Failed to add item' });
-            }
-
-            res.status(200).json({ message: 'Item added successfully!' });
-        });
-    });
-});
-
-// Endpoint to update an item
-app.put('/items/:id', (req, res) => {
-    const itemId = req.params.id;
-    const { description, price } = req.body;
-
-    db.run('UPDATE items SET description = ?, price = ? WHERE id = ?', [description, price, itemId], function(err) {
-        if (err) {
-            console.error('SQLite update error:', err.message);
-            return res.status(500).json({ error: 'Failed to update item' });
-        }
-
-        res.status(200).json({ message: 'Item updated successfully!' });
-    });
-});
-
-// Endpoint to delete an item
-app.delete('/items/:id', (req, res) => {
-    const itemId = req.params.id;
-
-    db.run('DELETE FROM items WHERE id = ?', [itemId], function(err) {
-        if (err) {
-            console.error('SQLite delete error:', err.message);
-            return res.status(500).json({ error: 'Failed to delete item' });
-        }
-
-        res.status(200).json({ message: 'Item deleted successfully!' });
-    });
-});
 
 // Endpoint to delete a project by name
 app.delete('/projects/name/:name', (req, res) => {
@@ -305,6 +199,38 @@ app.get('/projects', (req, res) => {
         res.json(rows);
     });
 });
+// Endpoint to get a project by name
+app.get('/projects/:name', (req, res) => {
+    const projectName = req.params.name;
+
+    db.get('SELECT name, expected_budget FROM projects WHERE name = ?', [projectName], (err, row) => {
+        if (err) {
+            console.error('SQLite query error:', err.message);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+
+        if (!row) {
+            return res.status(404).json({ error: 'Project not found' });
+        }
+
+        res.json(row);
+    });
+});
+// Endpoint to update a project
+app.put('/projects/:name', (req, res) => {
+    const projectName = req.params.name;
+    const { name, expected_budget } = req.body;
+
+    db.run('UPDATE projects SET name = ?, expected_budget = ? WHERE name = ?', [name, expected_budget, projectName], function(err) {
+        if (err) {
+            console.error('SQLite update error:', err.message);
+            return res.status(500).json({ error: 'Failed to update project' });
+        }
+
+        res.status(200).json({ message: 'Project updated successfully!' });
+    });
+});
+
 
 // Endpoint to add a project
 app.post('/projects', (req, res) => {
@@ -356,20 +282,7 @@ app.post('/save-entry', (req, res) => {
     );
 });
 
-// Endpoint to update a project
-app.put('/projects/:id', (req, res) => {
-    const projectId = req.params.id;
-    const { name, expected_budget } = req.body;
 
-    db.run('UPDATE projects SET name = ?, expected_budget = ? WHERE id = ?', [name, expected_budget, projectId], function(err) {
-        if (err) {
-            console.error('SQLite update error:', err.message);
-            return res.status(500).json({ error: 'Failed to update project' });
-        }
-
-        res.status(200).json({ message: 'Project updated successfully!' });
-    });
-});
 
 // Endpoint to delete a project
 app.delete('/projects/:id', (req, res) => {
@@ -427,13 +340,15 @@ app.get('/bill_entries/projectName', (req, res) => {
         res.json(rows);
     });
 });
-app.get('/delete_bill_entries', (req, res) => {
-    db.all('SELECT * FROM deleted_entries', (err, rows) => {
+app.get('/deleted_entries/:projectName', (req, res) => {
+    const projectName = req.params.projectName;
+
+    db.all('SELECT * FROM deleted_entries WHERE project_name = ?', [projectName], (err, rows) => {
         if (err) {
             console.error('SQLite error:', err.message);
             return res.status(500).json({ error: 'Failed to fetch deleted entries' });
         }
-        res.status(200).json(rows); // Assuming `rows` is an array of deleted entries
+        res.status(200).json(rows);
     });
 });
 
@@ -443,7 +358,6 @@ app.get('/delete_bill_entries', (req, res) => {
 app.delete('/delete_bill_entries/:id', (req, res) => {
     const billEntryId = req.params.id;
 
-    // Select the bill entry to be deleted
     db.get('SELECT * FROM bill_entries WHERE id = ?', [billEntryId], (err, row) => {
         if (err) {
             console.error('SQLite select error:', err.message);
@@ -454,7 +368,6 @@ app.delete('/delete_bill_entries/:id', (req, res) => {
             return res.status(404).json({ error: 'Bill entry not found' });
         }
 
-        // Insert the entry into deleted_entries table
         db.run(`INSERT INTO deleted_entries (project_name, date, material, description, bill_amount, payment_to, payment_by, payment_method)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
             [row.project_name, row.date, row.material, row.description, row.bill_amount, row.payment_to, row.payment_by, row.payment_method],
@@ -464,7 +377,6 @@ app.delete('/delete_bill_entries/:id', (req, res) => {
                     return res.status(500).json({ error: 'Failed to move bill entry to deleted entries' });
                 }
 
-                // Delete the entry from bill_entries table
                 db.run('DELETE FROM bill_entries WHERE id = ?', [billEntryId], function(err) {
                     if (err) {
                         console.error('SQLite delete error:', err.message);
@@ -477,7 +389,6 @@ app.delete('/delete_bill_entries/:id', (req, res) => {
         );
     });
 });
-
 
 
 
@@ -495,11 +406,9 @@ app.post('/restore_entry', (req, res) => {
             return res.status(404).json({ error: 'Entry not found in deleted entries' });
         }
 
-        const { project_name, material, description, bill_amount, payment_to, payment_by, payment_method, date } = row;
-
         db.run(`INSERT INTO bill_entries (project_name, material, description, bill_amount, payment_to, payment_by, payment_method, date)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-            [project_name, material, description, bill_amount, payment_to, payment_by, payment_method, date],
+            [row.project_name, row.material, row.description, row.bill_amount, row.payment_to, row.payment_by, row.payment_method, row.date],
             function(err) {
                 if (err) {
                     console.error('SQLite insert error:', err.message);
@@ -518,6 +427,7 @@ app.post('/restore_entry', (req, res) => {
         );
     });
 });
+
 
 app.get('/materials', (req, res) => {
     db.all('SELECT * FROM materials', (err, rows) => {
@@ -617,6 +527,7 @@ app.put('/bill_entries/:id', (req, res) => {
 
 
 
+
 app.get('/projects/:projectName/expected_budget', (req, res) => {
     const projectName = req.params.projectName;
 
@@ -633,9 +544,6 @@ app.get('/projects/:projectName/expected_budget', (req, res) => {
         res.status(200).json({ expected_budget: row.expected_budget });
     });
 });
-app.use('/krishnalanka-data', express.static(path.join(__dirname, '/public/krishnalanka.xlsx')));
-app.use('/suryaraopet-data', express.static(path.join(__dirname, '/public/suryaraopet_site.xlsx')));
-app.use('/sivalayam-data', express.static(path.join(__dirname, '/public/sivalayam.xlsx')));
 
 
 // Start the server

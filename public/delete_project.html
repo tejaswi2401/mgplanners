@@ -5,115 +5,157 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Delete Project</title>
     <link rel="stylesheet" href="styles2.css">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Delete Project</title>
-        <link rel="stylesheet" href="styles2.css">
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                min-height: 100vh;
-                background-image: url('const.jpeg');
-                background-size: cover;
-                background-position: center;
-                margin: 0;
-                padding: 0;
-            }
-    
-            .container {
-                width: 90%;
-                max-width: 400px;
-                background-color: rgba(255, 255, 255, 0.9);
-                padding: 20px;
-                border-radius: 10px;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-                text-align: center;
-            }
-    
-            h1 {
-                margin-bottom: 20px;
-            }
-    
-            label {
-                display: block;
-                margin-bottom: 10px;
-                font-weight: bold;
-                text-align: left;
-            }
-    
-            input[type="text"] {
-                width: calc(100% - 20px);
-                padding: 10px;
-                margin-bottom: 20px;
-                border: 1px solid #ccc;
-                border-radius: 5px;
-                font-size: 16px;
-                box-sizing: border-box;
-            }
-    
-            button {
-                width: 100%;
-                padding: 10px;
-                background-color: #d9534f;
-                color: white;
-                border: none;
-                border-radius: 5px;
-                font-size: 16px;
-                cursor: pointer;
-                box-sizing: border-box;
-            }
-    
-            button:hover {
-                background-color: #c9302c;
-            }
-    
-            #message {
-                margin-top: 20px;
-                font-size: 16px;
-            }
-        </style>
-    </head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-image: url('const.jpeg');
+            background-size: cover;
+            background-position: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 400px;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            text-align: left;
+        }
+
+        select {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .form-buttons {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .form-buttons button {
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .form-buttons button:hover {
+            background-color: #c9302c;
+        }
+
+        #message {
+            margin-top: 20px;
+            font-size: 16px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>Delete Project</h1>
         <form id="deleteProjectForm">
             <label for="projectName">Project Name:</label>
-            <input type="text" id="projectName" name="projectName" required>
-            <button type="submit">Delete Project</button>
+            <select id="projectName" name="projectName" required>
+                <option value="" disabled selected>Select a project</option>
+            </select>
+            <div class="form-buttons">
+                <button type="submit">Delete</button>
+                <button type="button" onclick="history.back()">Back</button>
+            </div>
         </form>
         <p id="message"></p>
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fetch project names and populate the dropdown
+            fetchProjectNames();
+        });
+
+        function fetchProjectNames() {
+            fetch('/projects')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch project names');
+                    }
+                    return response.json();
+                })
+                .then(projects => {
+                    const selectProject = document.getElementById('projectName');
+                    projects.forEach(project => {
+                        const option = document.createElement('option');
+                        option.value = project.name;
+                        option.textContent = project.name;
+                        selectProject.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to fetch project names. Please try again.');
+                });
+        }
+
         document.getElementById('deleteProjectForm').addEventListener('submit', function(event) {
             event.preventDefault();
 
-            const projectName = document.getElementById('projectName').value;
+            if (confirm('Are you sure you want to delete this project?')) {
+                const projectName = document.getElementById('projectName').value;
 
-            fetch(`http://:8032/projects/name/${projectName}`, {
-                method: 'DELETE'
-            })
-            .then(response => response.json())
-            .then(data => {
-                const messageElement = document.getElementById('message');
-                if (data.error) {
-                    messageElement.textContent = 'Error: ' + data.error;
-                    messageElement.style.color = 'red';
-                } else {
-                    messageElement.textContent = data.message;
-                    messageElement.style.color = 'green';
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+                fetch(`/projects/name/${encodeURIComponent(projectName)}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const messageElement = document.getElementById('message');
+                    if (data.error) {
+                        messageElement.textContent = 'Error: ' + data.error;
+                        messageElement.style.color = 'red';
+                    } else {
+                        messageElement.textContent = data.message;
+                        messageElement.style.color = 'green';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to delete project. Please try again.');
+                });
+            }
         });
+        function logout() {
+            var confirmation = confirm('Are you sure you want to logout?');
+            if (confirmation) {
+                window.location.href = 'index.html'; // Redirect to index.html
+            }
+        }
+        
+        
     </script>
 </body>
 </html>
